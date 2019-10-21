@@ -1,0 +1,8 @@
+- git:
+    local-name: turtlebot3_simulations
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3_simulations
+    version: kinetic-devel
+- git:
+    local-name: turtlebot3
+    uri: https://github.com/ROBOTIS-GIT/turtlebot3
+    version: kinetic-devel
