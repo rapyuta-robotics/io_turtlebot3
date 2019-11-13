@@ -56,6 +56,43 @@ code {
   box-shadow: 0 0 1px #dc1d30;
 }
 
+#amphionWrapper {
+  flex-grow: 1;
+  position: relative;
+}
+
+#viewportStats {
+  position: absolute !important;
+  top: auto !important;
+  left: auto !important;
+  right: 0 !important;
+  bottom: 0 !important;
+}
+
+#rosStatus{
+  font-size: 0.85rem;
+}
+
+#rosInput {
+  font: inherit;
+  margin-top: 10px;
+  padding: 5px 10px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #dddddd;
+  background-color: #ffffff;
+}
+
+#rosSubmit {
+  background-color: #dc1d30;
+  color: #ffffff;
+  border: 0;
+  font: inherit;
+  padding: 5px 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
 .arrowRow {
   display: flex;
   align-items: center;

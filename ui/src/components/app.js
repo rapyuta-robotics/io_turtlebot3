@@ -1,10 +1,10 @@
 import React from 'react';
+import Amphion from 'amphion';
 import ROSLIB from 'roslib';
-import Zethus from 'zethus'
 import _ from 'lodash';
 import mousetrap from 'mousetrap';
 
-import { ZETHUS_CONFIG, WEBSOCKET_ENDPOINT } from "../config";
+import { WEBSOCKET_ENDPOINT } from "../config";
 import UpArrow from '../imgs/up.svg';
 import DownArrow from '../imgs/down.svg';
 import LeftArrow from '../imgs/left.svg';
@@ -50,9 +50,21 @@ const getAngularZ = (pressedKeys) => {
   return 0;
 };
 
+const ROS_SOCKET_STATUSES = {
+  INITIAL: 'Idle. Not Connected',
+  CONNECTING: 'Connecting',
+  CONNECTED: 'Connected successfully',
+  CONNECTION_ERROR: 'Error in connection',
+};
+
+
 class App extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      rosStatus: ROS_SOCKET_STATUSES.INITIAL,
+      endpoint: WEBSOCKET_ENDPOINT,
+    };
     this.ros = new ROSLIB.Ros();
     this.cmdVel = new ROSLIB.Topic({
       ros : this.ros,
@@ -63,17 +75,85 @@ class App extends React.Component {
     this.publishEvent = null;
     this.pressedKeys = [];
     this.gamepads = {};
+    this.viewer = new Amphion.TfViewer(this.ros);
+    this.amphionWrapper = React.createRef();
 
+    this.connect = this.connect.bind(this);
     this.publishTwistKeys = this.publishTwistKeys.bind(this);
     this.pressKey = this.pressKey.bind(this);
     this.leaveKey = this.leaveKey.bind(this);
     this.stop = this.stop.bind(this);
     this.gameLoop = this.gameLoop.bind(this);
     this.publishJoystick = this.publishJoystick.bind(this);
+    this.handleUpdateEndpoint = this.handleUpdateEndpoint.bind(this);
+    this.onEndpointSubmit = this.onEndpointSubmit.bind(this);
   }
 
   componentDidMount() {
-    this.ros.connect(WEBSOCKET_ENDPOINT);
+    this.ros.on('connection', () => {
+      this.setState({
+        rosStatus: ROS_SOCKET_STATUSES.CONNECTED,
+      });
+      this.laserViz = new Amphion.LaserScan(
+          this.ros,
+          '/scan',
+      );
+      this.viewer.addVisualization(this.laserViz);
+      this.laserViz.subscribe();
+
+      this.robotViz = new Amphion.RobotModel(
+          this.ros,
+          'robot_description',
+          {
+            packages: {
+              turtlebot3_description: "https://raw.githubusercontent.com/ROBOTIS-GIT/turtlebot3/master/turtlebot3_description"
+            }
+          },
+      );
+      this.viewer.addRobot(this.robotViz);
+
+
+      this.tfViz = new Amphion.Tf(
+          this.ros,
+          [
+            {
+              name: '/tf',
+              messageType: 'tf2_msgs/TFMessage',
+            }
+          ],
+      );
+      this.viewer.addVisualization(this.tfViz);
+      this.tfViz.subscribe();
+
+      this.odomViz = new Amphion.Odometry(
+          this.ros,
+          '/odom',
+          {
+            keep: 10,
+          }
+      );
+      this.viewer.addVisualization(this.odomViz);
+      this.odomViz.subscribe();
+
+    });
+
+    this.ros.on('error', () => {
+      this.setState({
+        rosStatus: ROS_SOCKET_STATUSES.CONNECTION_ERROR,
+      });
+    });
+
+    this.ros.on('close', () => {
+      this.setState({
+        rosStatus: ROS_SOCKET_STATUSES.INITIAL,
+      });
+    });
+
+    this.connect();
+    const container = this.amphionWrapper.current;
+    this.viewer.setContainer(container);
+    this.viewer.scene.stats.dom.id = 'viewportStats';
+    container.appendChild(this.viewer.scene.stats.dom);
     mousetrap.bind('up', () => this.pressKey(MOUSE_KEYS.UP), 'keydown');
     mousetrap.bind('down', () => this.pressKey(MOUSE_KEYS.DOWN), 'keydown');
     mousetrap.bind('left', () => this.pressKey(MOUSE_KEYS.LEFT), 'keydown');
@@ -94,6 +174,23 @@ class App extends React.Component {
 
   leaveKey(key) {
     this.pressedKeys = _.filter(this.pressedKeys, k => k !== key);
+  }
+
+  connect() {
+    const { endpoint } = this.state;
+
+    if(endpoint) {
+      this.setState({
+        rosStatus: ROS_SOCKET_STATUSES.CONNECTING,
+      });
+      this.ros.connect(endpoint);
+    }
+  }
+
+  disconnect() {
+    if (this.ros && this.ros.close) {
+      this.ros.close();
+    }
   }
 
   gamepadHandler(event, connecting) {
@@ -162,12 +259,48 @@ class App extends React.Component {
     this.cmdVel.publish(new ROSLIB.Message(NULL_POSE));
   }
 
+  handleUpdateEndpoint(e) {
+    e.preventDefault();
+    this.setState({
+      endpoint: e.target.value,
+    });
+  }
+
+  onEndpointSubmit(e) {
+    const { rosStatus } = this.state;
+    e.preventDefault();
+    if (
+        _.includes(
+            [ROS_SOCKET_STATUSES.CONNECTED, ROS_SOCKET_STATUSES.CONNECTING],
+            rosStatus,
+        )
+    ) {
+      this.disconnect();
+    } else {
+      this.connect();
+    }
+  }
+
   render() {
+    const { endpoint, rosStatus } = this.state;
     return (
       <div id="appWrapper" className="flex">
         <div id="leftbar">
           <h3>Turtlebot Teleop</h3>
-          <button onClick={this.stop} id="emergencyStop">Emergency Stop</button>
+          <div id="rosStatus">Status: {rosStatus}</div>
+          <form onSubmit={this.onEndpointSubmit}>
+            <input id="rosInput" type="text" onChange={this.handleUpdateEndpoint} value={endpoint} />
+            <button id="rosSubmit" type="submit">{_.includes(
+                [
+                  ROS_SOCKET_STATUSES.CONNECTED,
+                  ROS_SOCKET_STATUSES.CONNECTING,
+                ],
+                rosStatus,
+            )
+                ? 'Disconnect'
+                : 'Connect'}</button>
+          </form>
+
           <div className="arrowRow">
             <button className="arrowButton" onMouseDown={() => this.pressKey(MOUSE_KEYS.UP)} onMouseUp={() => this.leaveKey(MOUSE_KEYS.UP)}>
               <img src={UpArrow} alt="" />
@@ -184,8 +317,9 @@ class App extends React.Component {
               <img src={RightArrow} alt="" />
             </button>
           </div>
+          <button onClick={this.stop} id="emergencyStop">Emergency Stop</button>
         </div>
-        <Zethus configuration={ZETHUS_CONFIG} />
+        <div id="amphionWrapper" ref={this.amphionWrapper} />
       </div>
     );
   }
