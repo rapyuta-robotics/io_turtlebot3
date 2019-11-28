@@ -90,6 +90,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    const { endpoint } = this.state;
     this.ros.on('connection', () => {
       this.setState({
         rosStatus: ROS_SOCKET_STATUSES.CONNECTED,
@@ -149,7 +150,9 @@ class App extends React.Component {
       });
     });
 
-    this.connect();
+    if(endpoint) {
+      this.connect();
+    }
     const container = this.amphionWrapper.current;
     this.viewer.setContainer(container);
     this.viewer.scene.stats.dom.id = 'viewportStats';
