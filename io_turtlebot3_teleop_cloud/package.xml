@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>turtlebot3_teleop_cloud</name>
+  <version>0.0.1</version>
+  <description>Allows turtlebot3 control from the web</description>
+  <maintainer email="opensource@rapyuta.io">Rapyuta Robotics</maintainer>
+  <license>Commercial</license>
+  <depend>std_msgs</depend>
+  <exec_depend>rosbridge_server</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
