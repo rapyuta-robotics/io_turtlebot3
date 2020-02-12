@@ -1,0 +1,76 @@
+{
+    "apiVersion": "1.0.0",
+    "name": "turtebot3_bringup",
+    "packageVersion": "v0.0.1",
+    "description": "",
+    "bindable": true,
+    "plans": [
+        {
+            "name": "default",
+            "metadata": {},
+            "singleton": false,
+            "components": [
+                {
+                    "name": "bringup",
+                    "description": "",
+                    "ros": {
+                        "topics": [
+                            {
+                                "name": "/tf",
+                                "qos": "low",
+                                "compression": "",
+                                "scoped": false,
+                                "targeted": false
+                            },
+                            {
+                                "name": "/scan",
+                                "qos": "low",
+                                "compression": "",
+                                "scoped": false,
+                                "targeted": false
+                            },
+                            {
+                                "name": "/cmd_vel",
+                                "qos": "low",
+                                "compression": "",
+                                "scoped": false,
+                                "targeted": false
+                            }
+                        ],
+                        "services": [],
+                        "actions": [],
+                        "isROS": true,
+                        "ros_distro": "melodic"
+                    },
+                    "requiredRuntime": "device",
+                    "restart_policy": "always",
+                    "architecture": "arm32v7",
+                    "executables": [
+                        {
+                            "name": "launch",
+                            "simulationOptions": {
+                                "simulation": false
+                            },
+                            "cmd": [
+                                "roslaunch turtlebot3_bringup turtlebot3_robot.launch"
+                            ]
+                        }
+                    ],
+                    "parameters": []
+                }
+            ],
+            "includePackages": [],
+            "dependentDeployments": [],
+            "inboundROSInterfaces": {
+                "topics": [
+                    {
+                        "name": "/cmd_vel"
+                    }
+                ],
+                "services": [],
+                "actions": []
+            },
+            "exposedParameters": []
+        }
+    ]
+}
