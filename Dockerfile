@@ -18,3 +18,5 @@ RUN catkin init &&\
 
 RUN bash -c "source /opt/ros/melodic/setup.bash && catkin build"
 
+CMD ["/bin/bash", "-c", "source /catkin/devel/setup.bash && roslaunch turtlebot3_teleop_cloud ui.launch"]
+
