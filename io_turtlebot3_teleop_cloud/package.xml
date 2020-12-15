@@ -7,5 +7,6 @@
   <license>Commercial</license>
   <depend>std_msgs</depend>
   <exec_depend>rosbridge_server</exec_depend>
+  <exec_depend>python-future</exec_depend>
   <buildtool_depend>catkin</buildtool_depend>
 </package>
