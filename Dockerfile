@@ -9,6 +9,7 @@ COPY . /catkin/src
 WORKDIR /catkin
 
 RUN catkin init &&\
+	wstool init &&\
 	rosdep update &&\
 	find -L src -type f -name "*.rosinstall" -exec wstool merge -t src {} \; &&\
 	wstool up -t src --continue-on-error --abort-changed-uris &&\
