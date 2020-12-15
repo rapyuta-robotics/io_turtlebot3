@@ -45,7 +45,7 @@
                         "services": [],
                         "actions": [],
                         "isROS": true,
-                        "ros_distro": "melodic"
+                        "ros_distro": "kinetic"
                     },
                     "requiredRuntime": "cloud",
                     "architecture": "amd64",
@@ -56,7 +56,7 @@
                                 "simulation": false
                             },
                             "gitExecutable": {
-                                "repository": "https://github.com/rapyuta-robotics/io_turtlebot3",
+                                "repository": "https://github.com/rapyuta-robotics/io_turtlebot3#kinetic",
                                 "strategyType": "Source",
                                 "dockerFilePath": "",
                                 "contextDir": ""

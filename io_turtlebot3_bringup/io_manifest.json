@@ -40,7 +40,7 @@
                         "services": [],
                         "actions": [],
                         "isROS": true,
-                        "ros_distro": "melodic"
+                        "ros_distro": "kinetic"
                     },
                     "requiredRuntime": "device",
                     "restart_policy": "always",
