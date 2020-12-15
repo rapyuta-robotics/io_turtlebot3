@@ -9,7 +9,7 @@ COPY . /catkin/src
 WORKDIR /catkin
 
 RUN catkin init &&\
-	wstool init &&\
+	wstool init src &&\
 	rosdep update &&\
 	find -L src -type f -name "*.rosinstall" -exec wstool merge -t src {} \; &&\
 	wstool up -t src --continue-on-error --abort-changed-uris &&\
@@ -17,7 +17,4 @@ RUN catkin init &&\
 	pip install git+git://github.com/rapyuta-robotics/autobahn-python@py2_backport future
 
 RUN bash -c "source /opt/ros/melodic/setup.bash && catkin build"
-
-
-
 
